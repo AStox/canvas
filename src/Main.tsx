@@ -6,7 +6,6 @@ import "./Main.sass";
 const Main = () => {
   return (
     <div className="Main" data-testid="Main">
-      Welcome
       <Game />
     </div>
   );

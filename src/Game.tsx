@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Map } from "immutable";
 import forEach from "lodash/forEach";
 import { debug } from "console";
+import Entity from "./Entity";
 
 interface Pos2D {
   x: number;
@@ -10,8 +11,7 @@ interface Pos2D {
 
 interface SceneObject {
   pos: pos2D;
-  height: number;
-  width: number;
+  draw(): void;
 }
 
 interface Scene {
@@ -26,23 +26,28 @@ const Game = () => {
   const tickSpeed = 1;
   const rect = { x: 5, y: 5 };
   const pos = { x: 10, y: 10 };
-  const obj = {
-    pos: {
-      x: 0,
-      y: 0,
-    },
-    height: 5,
-    width: 5,
-  };
+  const obj = Entity();
   let sceneObjects: SceneObject[] = [];
 
   useEffect(() => {
     canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (canvas && canvas.getContext) {
       ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-      // Run();
+      Run();
     }
   }, []);
+
+  function Run() {
+    sceneObjects = [...sceneObjects, obj];
+    setInterval(() => {
+      frame += 1;
+      obj.move({ x: 1, y: 1 });
+      Draw();
+      if (DEBUG) {
+        console.log(`frame ${frame}`);
+      }
+    }, tickSpeed);
+  }
 
   function Draw() {
     // ctx.fillStyle = "rgb(200, 0, 0)";
@@ -61,20 +66,8 @@ const Game = () => {
       parseInt(canvas.style.width)
     );
     forEach(sceneObjects, (obj: SceneObject) => {
-      ctx.fillRect(obj.pos.x, obj.pos.y, obj.height, obj.width);
+      obj.draw(ctx);
     });
-  }
-
-  function Run() {
-    sceneObjects = [...sceneObjects, obj];
-    setInterval(() => {
-      frame += 1;
-      obj.pos = { x: 1 + obj.pos.x, y: 1 + obj.pos.y };
-      Draw();
-      if (DEBUG) {
-        console.log(`frame ${frame}`);
-      }
-    }, tickSpeed);
   }
 
   return <canvas id="canvas" height={550} width={550} />;
