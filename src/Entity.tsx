@@ -1,18 +1,26 @@
-const Entity = (pos) => {
-  //   const pos = iPos || { x: 0, y: 0 };
-  const dim = { height: 1, width: 1 };
+export interface EntityProps {
+  pos: Pos2D;
+}
 
-  const move = (newPos) => {
+const Entity = ({ pos }: EntityProps) => {
+  pos = pos || { x: 1, y: 1 };
+  const dim = { height: 2, width: 2 };
+
+  //   console.log(pos);
+  const move = (newPos: Pos2D) => {
+    // console.log(pos);
     pos.x += newPos.x;
     pos.y += newPos.y;
+  };
+
+  const draw = (ctx: CanvasRenderingContext2D) => {
+    ctx.fillRect(pos.x, pos.y, dim.height, dim.width);
   };
 
   return {
     pos,
     move,
-    draw: (ctx: CanvasRenderingContext2D) => {
-      ctx.fillRect(pos.x, pos.y, dim.height, dim.width);
-    },
+    draw,
   };
 };
 
