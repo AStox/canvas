@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Map } from "immutable";
 import forEach from "lodash/forEach";
-import Entity from "./Entity";
+import Pawn from "./Pawn";
+import Source from "./Source";
 
-interface SceneObject {
-  pos: pos2D;
-  draw(): void;
-}
-
-interface Scene {
-  objects: SceneObject[];
+export interface OmniProps {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  frame: number;
+  sceneObjects: SceneObject[];
 }
 
 const Game = () => {
@@ -24,22 +23,17 @@ const Game = () => {
     canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (canvas && canvas.getContext) {
       ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-      globals = { ctx, canvas, frame, sceneObjects };
-      Run(globals);
+      const omniProps = { ctx, canvas, frame, sceneObjects };
+      Run(omniProps);
     }
   }, []);
 
-  export interface Global {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    frame: number;
-    sceneObjects: SceneObject[];
-  }
-
-  function Run(props: Global) {
-    const pos = { x: 300, y: 400 };
-    const obj = Entity({ pos, ...props });
-    sceneObjects = [...sceneObjects, obj];
+  function Run(props: OmniProps) {
+    let pos = { x: 450, y: 400 };
+    const pawn = Pawn({ pos, ...props });
+    pos = { x: 100, y: 200 };
+    const source = Source({ pos, ...props });
+    sceneObjects = [...sceneObjects, pawn, source];
     setInterval(() => {
       frame += 1;
 
