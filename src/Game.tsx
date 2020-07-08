@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import forEach from "lodash/forEach";
-import Pawn from "./Pawn";
-import Source from "./Source";
+import pawn from "./Pawn";
+import source from "./Source";
 import { Entity } from "./Entity";
 
 export interface OmniProps {
@@ -15,11 +15,11 @@ const Game = () => {
   let canvas: HTMLCanvasElement = document.getElementById("canvas");
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
-  const TICKSPEED = 20;
+  const TICKSPEED = 50;
 
   let sceneObjects: Entity[] = [];
 
-  function Draw() {
+  function Draw(sceneObjects: Entity[]) {
     // ctx.fillStyle = "rgb(200, 0, 0)";
     // ctx.fillRect(10, 10, 50, 50);
 
@@ -29,27 +29,23 @@ const Game = () => {
     // ctx.fillRect(25, 25, 100, 100);
     // ctx.clearRect(45, 45, 60, 60);
     // ctx.strokeRect(50, 50, 50, 50);
-    ctx.clearRect(
-      0,
-      0,
-      parseInt(canvas.style.height, 10),
-      parseInt(canvas.style.width, 10)
-    );
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     forEach(sceneObjects, (obj: Entity) => {
-      obj.draw();
+      obj.tick();
     });
   }
 
   function Run(props: OmniProps) {
     let pos = { x: 450, y: 400 };
-    const pawn = Pawn({ pos, ...props });
+    const pawnObj = pawn({ pos, ...props });
     pos = { x: 100, y: 200 };
-    const source = Source({ pos, ...props });
-    sceneObjects = [...sceneObjects, pawn, source];
+    const sourceObj = source({ pos, ...props });
+    props.sceneObjects.push(pawnObj);
+    props.sceneObjects.push(sourceObj);
     setInterval(() => {
       frame += 1;
 
-      Draw();
+      Draw(props.sceneObjects);
     }, TICKSPEED);
   }
 
