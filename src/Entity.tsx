@@ -1,4 +1,4 @@
-import { OmniProps } from "./game";
+import { OmniProps } from "./Game";
 import { EntityType } from "./EntityType";
 
 export interface EntityProps extends OmniProps {
