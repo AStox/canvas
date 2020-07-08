@@ -38,10 +38,11 @@ const Game = () => {
   function Run(props: OmniProps) {
     let pos = { x: 450, y: 400 };
     const pawnObj = pawn({ pos, ...props });
-    pos = { x: 100, y: 200 };
-    const sourceObj = source({ pos, ...props });
+    const sourceObj1 = source({ pos: { x: 100, y: 200 }, ...props });
+    const sourceObj2 = source({ pos: { x: 400, y: 250 }, ...props });
     props.sceneObjects.push(pawnObj);
-    props.sceneObjects.push(sourceObj);
+    props.sceneObjects.push(sourceObj1);
+    props.sceneObjects.push(sourceObj2);
     setInterval(() => {
       frame += 1;
 
