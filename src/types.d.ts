@@ -3,11 +3,6 @@ interface Pos2D {
   y: number;
 }
 
-interface SceneObject {
-  pos: pos2D;
-  draw(): void;
-}
-
 interface Scene {
   objects: SceneObject[];
 }

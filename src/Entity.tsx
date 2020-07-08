@@ -5,17 +5,17 @@ export interface EntityProps extends OmniProps {
   pos: Pos2D;
 }
 
-interface EntityReturn extends EntityProps {
+export interface Entity extends EntityProps {
   entityType: EntityType;
   move(newPos: Pos2D): void;
   draw(): void;
 }
 
-export interface EntityFunc {
-  (props: EntityProps): EntityReturn;
-}
+// export interface EntityFunc {
+//   (props: EntityProps): EntityReturn;
+// }
 
-const Entity: EntityFunc = (props) => {
+const entity = (props: EntityProps) => {
   const entityType = EntityType.Entity;
   let { pos, ctx } = props;
   pos = pos || { x: 1, y: 1 };
@@ -41,4 +41,4 @@ const Entity: EntityFunc = (props) => {
   };
 };
 
-export default Entity;
+export default entity;

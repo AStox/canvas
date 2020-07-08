@@ -1,4 +1,4 @@
-import Entity, { EntityProps, EntityFunc } from "./Entity";
+import Entity, { EntityProps } from "./Entity";
 import { EntityType } from "./EntityType";
 
 export interface SourceProps extends EntityProps {
@@ -7,13 +7,9 @@ export interface SourceProps extends EntityProps {
   falloff?: number;
 }
 
-interface SourceReturn extends SourceProps {}
+export interface SourceReturn extends SourceProps {}
 
-export interface SourceFunc {
-  (props: SourceProps): SourceReturn;
-}
-
-const Source: SourceFunc = (props) => {
+const Source = (props: SourceProps) => {
   const { strength, range, falloff } = props;
   const entityType = EntityType.Source;
   return {

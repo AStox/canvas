@@ -1,5 +1,5 @@
-import Entity, { EntityProps, EntityFunc } from "./Entity";
 import { forEach } from "lodash";
+import Entity, { EntityProps } from "./Entity";
 import { EntityType } from "./EntityType";
 
 export interface PawnProps extends EntityProps {
@@ -7,15 +7,11 @@ export interface PawnProps extends EntityProps {
   sight?: number;
 }
 
-interface PawnReturn extends PawnProps {
+export interface Pawn extends PawnProps {
   load?: number;
 }
 
-export interface PawnFunc {
-  (props: PawnProps): PawnReturn;
-}
-
-const Pawn: PawnFunc = (props) => {
+const Pawn = (props: PawnProps) => {
   const entityType = EntityType.Pawn;
   const { load, sight, sceneObjects } = props;
   const { pos, move, draw } = Entity(props);
@@ -23,7 +19,7 @@ const Pawn: PawnFunc = (props) => {
 
   const tick = () => {
     forEach(sceneObjects, (obj: EntityFunc) => {
-      // obj.;
+      obj.;
     });
   };
 

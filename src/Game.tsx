@@ -2,12 +2,13 @@ import React, { useEffect } from "react";
 import forEach from "lodash/forEach";
 import Pawn from "./Pawn";
 import Source from "./Source";
+import { Entity } from "./Entity";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   frame: number;
-  sceneObjects: SceneObject[];
+  sceneObjects: Entity[];
 }
 
 const Game = () => {
@@ -16,7 +17,7 @@ const Game = () => {
   let frame = 0;
   const TICKSPEED = 20;
 
-  let sceneObjects: SceneObject[] = [];
+  let sceneObjects: Entity[] = [];
 
   function Draw() {
     // ctx.fillStyle = "rgb(200, 0, 0)";
@@ -34,8 +35,8 @@ const Game = () => {
       parseInt(canvas.style.height, 10),
       parseInt(canvas.style.width, 10)
     );
-    forEach(sceneObjects, (obj: SceneObject) => {
-      obj.draw(ctx);
+    forEach(sceneObjects, (obj: Entity) => {
+      obj.draw();
     });
   }
 
