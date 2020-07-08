@@ -1,11 +1,23 @@
 import { OmniProps } from "./game";
+import { EntityType } from "./EntityType";
 
 export interface EntityProps extends OmniProps {
-  pos?: Pos2D;
+  pos: Pos2D;
 }
 
-const Entity = (props: EntityProps) => {
-  let { pos } = props;
+interface EntityReturn extends EntityProps {
+  entityType: EntityType;
+  move(newPos: Pos2D): void;
+  draw(): void;
+}
+
+export interface EntityFunc {
+  (props: EntityProps): EntityReturn;
+}
+
+const Entity: EntityFunc = (props) => {
+  const entityType = EntityType.Entity;
+  let { pos, ctx } = props;
   pos = pos || { x: 1, y: 1 };
   const dim = { height: 5, width: 5 };
 
@@ -16,15 +28,16 @@ const Entity = (props: EntityProps) => {
     pos.y += newPos.y;
   };
 
-  const draw = (ctx: CanvasRenderingContext2D) => {
+  const draw = () => {
     ctx.fillRect(pos.x, pos.y, dim.height, dim.width);
   };
 
   return {
+    ...props,
+    entityType,
     pos,
     move,
     draw,
-    ...props,
   };
 };
 
