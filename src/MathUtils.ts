@@ -11,7 +11,20 @@ export function magnitude(pos1: Pos2D, pos2?: Pos2D) {
 
 export function normalize(vector: Pos2D) {
   let mag = magnitude(vector);
-  let x = vector.x / mag;
-  let y = vector.y / mag;
+  let x = isNaN(vector.x / mag) ? 0 : vector.x / mag;
+  let y = isNaN(vector.y / mag) ? 0 : vector.y / mag;
   return { x, y };
+}
+
+export function clamp(x: number, min: number, max: number) {
+  if (isNaN(x)) {
+    return max;
+  }
+  if (x > max) {
+    return max;
+  }
+  if (x < min) {
+    return min;
+  }
+  return x;
 }

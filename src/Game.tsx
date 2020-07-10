@@ -38,8 +38,16 @@ const Game = () => {
   function Run(props: OmniProps) {
     let pos = { x: 450, y: 400 };
     const pawnObj = pawn({ pos, ...props });
-    const sourceObj1 = source({ pos: { x: 100, y: 200 }, ...props });
-    const sourceObj2 = source({ pos: { x: 400, y: 250 }, ...props });
+    const sourceObj1 = source({
+      pos: { x: 100, y: 200 },
+      strength: 1,
+      ...props,
+    });
+    const sourceObj2 = source({
+      pos: { x: 400, y: 250 },
+      strength: 1,
+      ...props,
+    });
     props.sceneObjects.push(pawnObj);
     props.sceneObjects.push(sourceObj1);
     props.sceneObjects.push(sourceObj2);

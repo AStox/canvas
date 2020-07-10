@@ -1,14 +1,16 @@
 import { forEach } from "lodash";
 import entity, { EntityProps, Entity } from "./Entity";
+import { Source } from "./Source";
 import { EntityType } from "./EntityType";
+import { magnitude, normalize } from "./MathUtils";
 
 export interface PawnProps extends EntityProps {
   load?: number;
   sight?: number;
 }
 
-export interface Pawn extends PawnProps {
-  load?: number;
+export interface Pawn extends Entity {
+  load: number;
   tick(): void;
 }
 
@@ -18,19 +20,23 @@ const pawn = (props: PawnProps) => {
   const { pos, move, tick } = entity(props);
 
   const pawnTick = () => {
-    let dir = { x: 0, y: 0 };
-    let sourceCount = 0;
+    let x = 0;
+    let y = 0;
     forEach(sceneObjects, (obj: Entity) => {
       if (obj.entityType === EntityType.Source) {
-        sourceCount += 1;
-        const FACTOR = 0.01;
-        let dirToSource = {
-          x: (obj.pos.x - pos.x) * FACTOR,
-          y: (obj.pos.y - pos.y) * FACTOR,
-        };
+        let source = obj as Source;
+        let dirToSource = normalize({
+          x: source.pos.x - pos.x,
+          y: source.pos.y - pos.y,
+        });
+        let distToSource = magnitude(pos, source.pos);
+        x += dirToSource.x * source.strength * source.falloff(distToSource);
+        y += dirToSource.y * source.strength * source.falloff(distToSource);
+        console.log(source.falloff(distToSource));
       }
     });
-    dir = { x: dir.x / sourceCount, y: dir.y / sourceCount };
+    let dir = normalize({ x, y });
+    console.log(dir);
     move(dir);
     tick();
   };
