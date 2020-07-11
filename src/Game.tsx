@@ -15,23 +15,21 @@ const Game = () => {
   let canvas: HTMLCanvasElement = document.getElementById("canvas");
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
-  const TICKSPEED = 50;
+  const TICKSPEED = 100;
 
   let sceneObjects: Entity[] = [];
 
-  function Draw(sceneObjects: Entity[]) {
-    // ctx.fillStyle = "rgb(200, 0, 0)";
-    // ctx.fillRect(10, 10, 50, 50);
-
-    // ctx.fillStyle = "rgba(0, 0, 200, 0.5)";
-    // ctx.fillRect(30, 30, 50, 50);
-
-    // ctx.fillRect(25, 25, 100, 100);
-    // ctx.clearRect(45, 45, 60, 60);
-    // ctx.strokeRect(50, 50, 50, 50);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function Tick(sceneObjects: Entity[]) {
     forEach(sceneObjects, (obj: Entity) => {
       obj.tick();
+    });
+  }
+
+  function Draw(sceneObjects: Entity[]) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    forEach(sceneObjects, (obj: Entity) => {
+      obj.draw();
     });
   }
 
@@ -40,12 +38,14 @@ const Game = () => {
     const pawnObj = pawn({ pos, ...props });
     const sourceObj1 = source({
       pos: { x: 100, y: 200 },
-      strength: 1,
+      strength: 5,
+      range: 360,
       ...props,
     });
     const sourceObj2 = source({
       pos: { x: 400, y: 250 },
       strength: 1,
+      range: 300,
       ...props,
     });
     props.sceneObjects.push(pawnObj);
@@ -54,6 +54,7 @@ const Game = () => {
     setInterval(() => {
       frame += 1;
 
+      Tick(props.sceneObjects);
       Draw(props.sceneObjects);
     }, TICKSPEED);
   }

@@ -2,10 +2,12 @@ import { EntityProps, Entity } from "./Entity";
 import { EntityType } from "./EntityType";
 import entity from "./Entity";
 import { clamp } from "./MathUtils";
+import { deflateRaw } from "zlib";
+import { createTextChangeRange } from "../node_modules/typescript/lib/typescript";
 
 export interface SourceProps extends EntityProps {
-  strength?: number;
-  range?: number;
+  strength: number;
+  range: number;
 }
 
 export interface Source extends Entity {
@@ -15,14 +17,38 @@ export interface Source extends Entity {
 }
 
 const source = (props: SourceProps) => {
-  let { strength, range } = props;
+  let { strength, range, ctx, pos } = props;
+  let { draw } = entity(props);
   strength = strength || 1;
   range = range || 10;
   const entityType = EntityType.Source;
 
   const falloff = (dist: number) => {
-    const val = 1 - clamp(Math.pow(dist, 4), 0, 1);
+    const rangeFactor = Math.max(dist, 0) / range;
+    const val = 1 - clamp(Math.pow(rangeFactor, 4), 0, 1);
     return val;
+  };
+
+  const sourceDraw = () => {
+    const count = 3;
+    ctx.fillStyle = `rgba(0, 0, 0, ${1 / count})`;
+    for (let i = 1; i <= count; i++) {
+      ctx.beginPath();
+      ctx.arc(
+        pos.x,
+        pos.y,
+        Math.floor(range / count) * i,
+        0,
+        Math.PI * 2,
+        true
+      );
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2, true);
+    ctx.fill();
+    // draw();
   };
 
   return {
@@ -31,6 +57,7 @@ const source = (props: SourceProps) => {
     strength,
     range,
     falloff,
+    draw: sourceDraw,
   };
 };
 

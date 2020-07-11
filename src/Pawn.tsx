@@ -18,6 +18,7 @@ const pawn = (props: PawnProps) => {
   const entityType = EntityType.Pawn;
   const { load, sight, sceneObjects } = props;
   const { pos, move, tick } = entity(props);
+  const maxSpeed = 3;
 
   const pawnTick = () => {
     let x = 0;
@@ -32,11 +33,13 @@ const pawn = (props: PawnProps) => {
         let distToSource = magnitude(pos, source.pos);
         x += dirToSource.x * source.strength * source.falloff(distToSource);
         y += dirToSource.y * source.strength * source.falloff(distToSource);
-        console.log(source.falloff(distToSource));
       }
     });
-    let dir = normalize({ x, y });
-    console.log(dir);
+    let dir = { x, y };
+    dir = {
+      x: normalize(dir).x * Math.min(magnitude(dir), maxSpeed),
+      y: normalize(dir).y * Math.min(magnitude(dir), maxSpeed),
+    };
     move(dir);
     tick();
   };

@@ -9,6 +9,7 @@ export interface Entity extends EntityProps {
   entityType: EntityType;
   move(newPos: Pos2D): void;
   tick(): void;
+  draw(): void;
 }
 
 // export interface EntityFunc {
@@ -32,15 +33,14 @@ const entity = (props: EntityProps) => {
     ctx.fillRect(pos.x, pos.y, dim.height, dim.width);
   };
 
-  const tick = () => {
-    draw();
-  };
+  const tick = () => {};
 
   return {
     ...props,
     entityType,
     pos,
     tick,
+    draw,
     move,
   };
 };
