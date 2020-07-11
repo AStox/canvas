@@ -17,8 +17,10 @@ export interface Pawn extends Entity {
 const pawn = (props: PawnProps) => {
   const entityType = EntityType.Pawn;
   const { load, sight, sceneObjects } = props;
-  const { pos, move, tick } = entity(props);
+  const { pos, move, tick, ctx, Kill } = entity(props);
   const maxSpeed = 2;
+  const minSpeed = 1;
+  const reach = 5;
 
   const pawnTick = () => {
     let x = 0;
@@ -30,15 +32,42 @@ const pawn = (props: PawnProps) => {
           x: source.pos.x - pos.x,
           y: source.pos.y - pos.y,
         });
+
         let distToSource = magnitude(pos, source.pos);
-        x += dirToSource.x * source.strength * source.falloff(distToSource);
-        y += dirToSource.y * source.strength * source.falloff(distToSource);
+
+        if (distToSource < reach) {
+          Kill(source);
+        }
+        dirToSource.x *= source.strength * source.falloff(distToSource);
+        dirToSource.y *= source.strength * source.falloff(distToSource);
+        x += dirToSource.x;
+        y += dirToSource.y;
+        ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        ctx.lineTo(pos.x + dirToSource.x * 10, pos.y + dirToSource.y * 10);
+        ctx.stroke();
       }
     });
     let dir = { x, y };
+
+    ctx.strokeStyle = `rgba(0, 0, 256, 1)`;
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    ctx.lineTo(pos.x + dir.x * 10, pos.y + dir.y * 10);
+    ctx.stroke();
+
+    if (magnitude(dir) < minSpeed) {
+      dir.x = normalize(dir).x * minSpeed;
+      dir.y = normalize(dir).y * minSpeed;
+    }
     dir = {
-      x: normalize(dir).x * Math.min(magnitude(dir), maxSpeed),
-      y: normalize(dir).y * Math.min(magnitude(dir), maxSpeed),
+      x:
+        normalize(dir).x *
+        Math.max(Math.min(magnitude(dir), maxSpeed), minSpeed),
+      y:
+        normalize(dir).y *
+        Math.max(Math.min(magnitude(dir), maxSpeed), minSpeed),
     };
     move(dir);
     tick();

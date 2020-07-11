@@ -19,19 +19,21 @@ export interface Source extends Entity {
 const source = (props: SourceProps) => {
   let { strength, range, ctx, pos } = props;
   let { draw } = entity(props);
-  strength = strength || 1;
+  const minStrength = 2;
+  strength = Math.max(strength, minStrength);
   range = range || 10;
+
   const entityType = EntityType.Source;
 
   const falloff = (dist: number) => {
     const rangeFactor = Math.max(dist, 0) / range;
-    const val = 1 - clamp(Math.pow(rangeFactor, 4), 0, 1);
+    const val = 1 - clamp(Math.pow(rangeFactor, 7), 0, 1);
     return val;
   };
 
   const sourceDraw = () => {
-    const count = 3;
-    ctx.fillStyle = `rgba(0, 0, 0, ${strength * 0.1 * (1 / count)})`;
+    const count = 30;
+    ctx.fillStyle = `rgba(0, 0, 0, ${0.05 * (1 / count)})`;
     for (let i = 1; i <= count; i++) {
       ctx.beginPath();
       ctx.arc(
@@ -47,7 +49,7 @@ const source = (props: SourceProps) => {
 
     ctx.fillStyle = `rgba(0, 0, 0, 1)`;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2, true);
+    ctx.arc(pos.x, pos.y, strength, 0, Math.PI * 2, true);
     ctx.fill();
     // draw();
   };

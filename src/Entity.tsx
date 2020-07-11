@@ -10,21 +10,21 @@ export interface Entity extends EntityProps {
   move(newPos: Pos2D): void;
   tick(): void;
   draw(): void;
+  kill(): void;
 }
 
 // export interface EntityFunc {
 //   (props: EntityProps): EntityReturn;
 // }
 
-const entity = (props: EntityProps) => {
+let entity = function (props: EntityProps) {
+  // entity = entity.bind(entity);
   const entityType = EntityType.Entity;
-  let { pos, ctx } = props;
+  let { pos, ctx, killList } = props;
   pos = pos || { x: 1, y: 1 };
   const dim = { height: 5, width: 5 };
 
-  //   console.log(pos);
   const move = (newPos: Pos2D) => {
-    // console.log(pos);
     pos.x += newPos.x;
     pos.y += newPos.y;
   };
