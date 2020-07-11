@@ -31,7 +31,7 @@ const source = (props: SourceProps) => {
 
   const sourceDraw = () => {
     const count = 3;
-    ctx.fillStyle = `rgba(0, 0, 0, ${1 / count})`;
+    ctx.fillStyle = `rgba(0, 0, 0, ${strength * 0.1 * (1 / count)})`;
     for (let i = 1; i <= count; i++) {
       ctx.beginPath();
       ctx.arc(
@@ -45,6 +45,7 @@ const source = (props: SourceProps) => {
       ctx.fill();
     }
 
+    ctx.fillStyle = `rgba(0, 0, 0, 1)`;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2, true);
     ctx.fill();

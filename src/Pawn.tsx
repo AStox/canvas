@@ -18,7 +18,7 @@ const pawn = (props: PawnProps) => {
   const entityType = EntityType.Pawn;
   const { load, sight, sceneObjects } = props;
   const { pos, move, tick } = entity(props);
-  const maxSpeed = 3;
+  const maxSpeed = 2;
 
   const pawnTick = () => {
     let x = 0;
