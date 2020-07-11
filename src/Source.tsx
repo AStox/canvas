@@ -27,13 +27,14 @@ const source = (props: SourceProps) => {
 
   const falloff = (dist: number) => {
     const rangeFactor = Math.max(dist, 0) / range;
-    const val = 1 - clamp(Math.pow(rangeFactor, 7), 0, 1);
+    const boost = 100;
+    const val = boost / (1 * dist);
     return val;
   };
 
   const sourceDraw = () => {
-    const count = 30;
-    ctx.fillStyle = `rgba(0, 0, 0, ${0.05 * (1 / count)})`;
+    const count = 1;
+    ctx.fillStyle = `rgba(0, 0, 0, ${0.1 * (1 / count)})`;
     for (let i = 1; i <= count; i++) {
       ctx.beginPath();
       ctx.arc(

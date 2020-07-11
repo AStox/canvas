@@ -50,7 +50,7 @@ const Game = () => {
 
   function randomSources(props: { count: number } & OmniProps) {
     const strengthMax = 20;
-    const rangeMax = 300;
+    const rangeMax = 100;
     for (let i = 0; i < props.count; i++) {
       const sourceObj = source({
         pos: {
@@ -58,7 +58,7 @@ const Game = () => {
           y: Math.floor(Math.random() * canvas.height),
         },
         strength: Math.random() * strengthMax,
-        range: 500,
+        range: 400,
         // range: Math.random() * rangeMax + 500,
         ...props,
       });

@@ -45,7 +45,8 @@ const pawn = (props: PawnProps) => {
         ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
         ctx.beginPath();
         ctx.moveTo(pos.x, pos.y);
-        ctx.lineTo(pos.x + dirToSource.x * 10, pos.y + dirToSource.y * 10);
+
+        ctx.lineTo(pos.x + dirToSource.x * 100, pos.y + dirToSource.y * 100);
         ctx.stroke();
       }
     });
