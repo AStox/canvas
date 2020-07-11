@@ -16,8 +16,8 @@ const Game = () => {
   let canvas: HTMLCanvasElement = document.getElementById("canvas");
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
-  // const TICKSPEED = 16.6;
-  const TICKSPEED = 50;
+  const TICKSPEED = 16.6;
+  // const TICKSPEED = 50;
 
   let sceneObjects: Entity[] = [];
   let killList: Entity[] = [];
@@ -71,7 +71,7 @@ const Game = () => {
     let pawnObj = pawn({ pos, ...props });
     pawnObj.this = pawnObj;
     props.sceneObjects.push(pawnObj);
-    randomSources({ count: 10, ...props });
+    randomSources({ count: 30, ...props });
     setInterval(() => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       frame += 1;
@@ -90,7 +90,9 @@ const Game = () => {
     }
   }, []);
 
-  return <canvas id="canvas" height={550} width={550} />;
+  return (
+    <canvas id="canvas" height={window.innerHeight} width={window.innerWidth} />
+  );
 };
 
 export default Game;

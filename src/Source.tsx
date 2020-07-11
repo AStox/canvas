@@ -33,20 +33,20 @@ const source = (props: SourceProps) => {
   };
 
   const sourceDraw = () => {
-    const count = 1;
-    ctx.fillStyle = `rgba(0, 0, 0, ${0.1 * (1 / count)})`;
-    for (let i = 1; i <= count; i++) {
-      ctx.beginPath();
-      ctx.arc(
-        pos.x,
-        pos.y,
-        Math.floor(range / count) * i,
-        0,
-        Math.PI * 2,
-        true
-      );
-      ctx.fill();
-    }
+    // const count = 1;
+    // ctx.fillStyle = `rgba(0, 0, 0, ${0.1 * (1 / count)})`;
+    // for (let i = 1; i <= count; i++) {
+    //   ctx.beginPath();
+    //   ctx.arc(
+    //     pos.x,
+    //     pos.y,
+    //     Math.floor(range / count) * i,
+    //     0,
+    //     Math.PI * 2,
+    //     true
+    //   );
+    //   ctx.fill();
+    // }
 
     ctx.fillStyle = `rgba(0, 0, 0, 1)`;
     ctx.beginPath();

@@ -42,21 +42,23 @@ const pawn = (props: PawnProps) => {
         dirToSource.y *= source.strength * source.falloff(distToSource);
         x += dirToSource.x;
         y += dirToSource.y;
-        ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
 
-        ctx.lineTo(pos.x + dirToSource.x * 100, pos.y + dirToSource.y * 100);
-        ctx.stroke();
+        // SOURCE DEBUG LINES
+        // ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
+        // ctx.beginPath();
+        // ctx.moveTo(pos.x, pos.y);
+        // ctx.lineTo(pos.x + dirToSource.x * 100, pos.y + dirToSource.y * 100);
+        // ctx.stroke();
       }
     });
     let dir = { x, y };
 
-    ctx.strokeStyle = `rgba(0, 0, 256, 1)`;
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx.lineTo(pos.x + dir.x * 10, pos.y + dir.y * 10);
-    ctx.stroke();
+    // DIR DEBUG LINE
+    // ctx.strokeStyle = `rgba(0, 0, 256, 1)`;
+    // ctx.beginPath();
+    // ctx.moveTo(pos.x, pos.y);
+    // ctx.lineTo(pos.x + dir.x * 10, pos.y + dir.y * 10);
+    // ctx.stroke();
 
     if (magnitude(dir) < minSpeed) {
       dir.x = normalize(dir).x * minSpeed;
