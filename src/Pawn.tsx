@@ -1,9 +1,11 @@
-import { forEach } from "lodash";
+import { forEach, includes } from "lodash";
 import entity, { EntityProps, Entity } from "./Entity";
 import { Source } from "./Source";
 import { EntityType } from "./EntityType";
 import { magnitude, normalize } from "./MathUtils";
 import { colours } from "./colours";
+import { transpile } from "../node_modules/typescript/lib/typescript";
+import trail from "./Trail";
 
 export interface PawnProps extends EntityProps {
   load?: number;
@@ -13,15 +15,19 @@ export interface PawnProps extends EntityProps {
 export interface Pawn extends Entity {
   load: number;
   tick(): void;
+  eating: boolean;
 }
 
 const pawn = (props: PawnProps) => {
   const entityType = EntityType.Pawn;
   const { load, sight, sceneObjects } = props;
-  const { pos, move, tick, ctx, Kill } = entity(props);
+  const { pos, move, tick, ctx, Kill, Create } = entity(props);
   const maxSpeed = 2;
-  const minSpeed = 1;
+  const minSpeed = 0.5;
   const dim = 5;
+  let trailCD = 0;
+  const trailCDMax = 10;
+  let eating = false;
 
   const pawnDraw = () => {
     ctx.fillStyle = `rgba(${colours.turqois}, 1)`;
@@ -31,8 +37,10 @@ const pawn = (props: PawnProps) => {
   const pawnTick = () => {
     let x = 0;
     let y = 0;
+    eating = false;
     forEach(sceneObjects, (obj: Entity) => {
-      if (obj.entityType === EntityType.Source) {
+      const influencers = [EntityType.Source];
+      if (influencers.includes(obj.entityType)) {
         let source = obj as Source;
         let dirToSource = normalize({
           x: source.pos.x - pos.x,
@@ -40,15 +48,21 @@ const pawn = (props: PawnProps) => {
         });
 
         let distToSource = magnitude(pos, source.pos);
+        if (source.entityType === EntityType.Source) {
+          if (distToSource < source.strength + dim / 2) {
+            // source.changeStrength(-1);
+            source.strength -= 0.1;
+            eating = true;
+            if (source.strength <= 0) {
+              Kill(source);
+            }
+          }
 
-        if (distToSource < source.strength + dim / 2) {
-          Kill(source);
+          dirToSource.x *= source.strength * source.falloff(distToSource);
+          dirToSource.y *= source.strength * source.falloff(distToSource);
+          x += dirToSource.x;
+          y += dirToSource.y;
         }
-        dirToSource.x *= source.strength * source.falloff(distToSource);
-        dirToSource.y *= source.strength * source.falloff(distToSource);
-        x += dirToSource.x;
-        y += dirToSource.y;
-
         // SOURCE DEBUG LINES
         // ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
         // ctx.beginPath();
@@ -78,16 +92,23 @@ const pawn = (props: PawnProps) => {
         normalize(dir).y *
         Math.max(Math.min(magnitude(dir), maxSpeed), minSpeed),
     };
-    move(dir);
+
+    trailCD += 1;
+    if (trailCD >= trailCDMax) {
+      Create(trail({ ...props, pos: { x: pos.x, y: pos.y } }));
+      trailCD = 0;
+    }
+    if (!eating) move(dir);
     tick();
   };
 
   return {
-    ...entity(props),
+    ...entity({ ...props }),
     entityType,
     load,
     tick: pawnTick,
     draw: pawnDraw,
+    eating,
   };
 };
 

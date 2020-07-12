@@ -11,6 +11,7 @@ export interface OmniProps {
   frame: number;
   sceneObjects: Entity[];
   Kill(obj: Entity): void;
+  Create(obj: Entity): void;
 }
 
 const Game = () => {
@@ -18,29 +19,39 @@ const Game = () => {
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
   const TICKSPEED = 16.6;
-  // const TICKSPEED = 50;
+  // const TICKSPEED = 500;
 
   let sceneObjects: Entity[] = [];
   let killList: Entity[] = [];
+  let createList: Entity[] = [];
 
-  function cleanup(sceneObjects: Entity[]) {
+  function afterTick(sceneObjects: Entity[]) {
     forEach(killList, (killObj) => {
       sceneObjects.splice(sceneObjects.indexOf(killObj), 1);
       killList.splice(killList.indexOf(killObj), 1);
     });
   }
 
+  function beforeTick(sceneObjects: Entity[]) {
+    forEach(createList, (createObj) => {
+      sceneObjects.push(createObj);
+      createList.splice(createList.indexOf(createObj), 1);
+    });
+  }
+
   function Tick(sceneObjects: Entity[]) {
+    beforeTick(sceneObjects);
     forEach(sceneObjects, (obj: Entity) => {
       obj.tick();
     });
-    cleanup(sceneObjects);
+    afterTick(sceneObjects);
   }
 
   function Draw(sceneObjects: Entity[]) {
     ctx.fillStyle = `rgba(${colours.background},1)`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     forEach(sceneObjects, (obj: Entity) => {
+      // console.log(obj.pos);
       obj.draw();
     });
   }
@@ -49,9 +60,12 @@ const Game = () => {
     killList.push(obj);
   }
 
+  function Create(obj: Entity) {
+    createList.push(obj);
+  }
+
   function randomSources(props: { count: number } & OmniProps) {
-    const strengthMax = 20;
-    const rangeMax = 100;
+    const strengthMax = 15;
     for (let i = 0; i < props.count; i++) {
       const sourceObj = source({
         pos: {
@@ -59,7 +73,6 @@ const Game = () => {
           y: Math.floor(Math.random() * canvas.height),
         },
         strength: Math.random() * strengthMax,
-        range: Math.random() * rangeMax + 500,
         ...props,
       });
       sceneObjects.push(sourceObj);
@@ -69,9 +82,18 @@ const Game = () => {
   function Run(props: OmniProps) {
     let pos = { x: 450, y: 400 };
     let pawnObj = pawn({ pos, ...props });
-    pawnObj.this = pawnObj;
     props.sceneObjects.push(pawnObj);
-    randomSources({ count: 30, ...props });
+    randomSources({ count: 20, ...props });
+    // const sourceObj = source({
+    //   pos: {
+    //     x: 420,
+    //     y: 400,
+    //   },
+    //   strength: 10,
+    //   ...props,
+    // });
+    // sceneObjects.push(sourceObj);
+
     setInterval(() => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       frame += 1;
@@ -85,7 +107,7 @@ const Game = () => {
     canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (canvas && canvas.getContext) {
       ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-      const omniProps = { ctx, canvas, frame, sceneObjects, Kill };
+      const omniProps = { ctx, canvas, frame, sceneObjects, Kill, Create };
       Run(omniProps);
     }
   }, []);
