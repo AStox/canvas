@@ -30,7 +30,7 @@ let entity = function (props: EntityProps) {
   };
 
   const draw = () => {
-    ctx.fillStyle = `rgba(0, 0, 0, 1)`;
+    ctx.fillStyle = `rgba(256, 256, 256, 1)`;
     ctx.fillRect(pos.x, pos.y, dim.height, dim.width);
   };
 

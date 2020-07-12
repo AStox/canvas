@@ -3,6 +3,7 @@ import entity, { EntityProps, Entity } from "./Entity";
 import { Source } from "./Source";
 import { EntityType } from "./EntityType";
 import { magnitude, normalize } from "./MathUtils";
+import { colours } from "./colours";
 
 export interface PawnProps extends EntityProps {
   load?: number;
@@ -20,7 +21,12 @@ const pawn = (props: PawnProps) => {
   const { pos, move, tick, ctx, Kill } = entity(props);
   const maxSpeed = 2;
   const minSpeed = 1;
-  const reach = 5;
+  const dim = 5;
+
+  const pawnDraw = () => {
+    ctx.fillStyle = `rgba(${colours.turqois}, 1)`;
+    ctx.fillRect(pos.x - dim / 2, pos.y - dim / 2, dim, dim);
+  };
 
   const pawnTick = () => {
     let x = 0;
@@ -35,7 +41,7 @@ const pawn = (props: PawnProps) => {
 
         let distToSource = magnitude(pos, source.pos);
 
-        if (distToSource < reach) {
+        if (distToSource < source.strength + dim / 2) {
           Kill(source);
         }
         dirToSource.x *= source.strength * source.falloff(distToSource);
@@ -81,6 +87,7 @@ const pawn = (props: PawnProps) => {
     entityType,
     load,
     tick: pawnTick,
+    draw: pawnDraw,
   };
 };
 

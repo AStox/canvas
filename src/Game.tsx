@@ -3,6 +3,7 @@ import forEach from "lodash/forEach";
 import pawn from "./Pawn";
 import source from "./Source";
 import { Entity } from "./Entity";
+import { colours } from "./colours";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
@@ -37,8 +38,8 @@ const Game = () => {
   }
 
   function Draw(sceneObjects: Entity[]) {
-    ctx.strokeStyle = "black";
-    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = `rgba(${colours.background},1)`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     forEach(sceneObjects, (obj: Entity) => {
       obj.draw();
     });
@@ -58,8 +59,7 @@ const Game = () => {
           y: Math.floor(Math.random() * canvas.height),
         },
         strength: Math.random() * strengthMax,
-        range: 400,
-        // range: Math.random() * rangeMax + 500,
+        range: Math.random() * rangeMax + 500,
         ...props,
       });
       sceneObjects.push(sourceObj);
