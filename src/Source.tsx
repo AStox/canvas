@@ -14,11 +14,10 @@ export interface Source extends Entity {
   strength: number;
   range: number;
   falloff(dist: number): number;
-  changeStrength(amount: number): void;
 }
 
 const source = (props: SourceProps) => {
-  let ret: partial<Source> = {
+  let ret: Partial<Source> = {
     ...entity(props),
   };
   let { strength, ctx, pos } = props;

@@ -4,6 +4,7 @@ import pawn from "./Pawn";
 import source from "./Source";
 import { Entity } from "./Entity";
 import { colours } from "./colours";
+import destination from "./Destination";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
@@ -80,10 +81,15 @@ const Game = () => {
   }
 
   function Run(props: OmniProps) {
-    let pos = { x: 450, y: 400 };
-    let pawnObj = pawn({ pos, ...props });
+    let pawnObj = pawn({ pos: { x: 450, y: 400 }, ...props });
+    let destinationObj = destination({
+      pos: { x: 450, y: 400 },
+      strength: 10,
+      ...props,
+    });
     props.sceneObjects.push(pawnObj);
-    randomSources({ count: 20, ...props });
+    props.sceneObjects.push(destinationObj);
+    randomSources({ count: 100, ...props });
     // const sourceObj = source({
     //   pos: {
     //     x: 420,

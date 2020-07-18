@@ -3,4 +3,5 @@ export enum EntityType {
   Pawn = "PAWN",
   Source = "SOURCE",
   Trail = "TRAIL",
+  Destination = "DESTINATION",
 }
