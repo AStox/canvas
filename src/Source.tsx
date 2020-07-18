@@ -21,7 +21,7 @@ const source = (props: SourceProps) => {
     ...entity(props),
   };
   let { strength, ctx, pos } = props;
-  let { draw } = entity(props);
+  let { draw } = ret;
   const minStrength = 2;
   ret.strength = Math.max(strength, minStrength);
   // range = range || 10;

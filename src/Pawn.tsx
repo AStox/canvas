@@ -5,7 +5,7 @@ import { EntityType } from "./EntityType";
 import { magnitude, normalize } from "./MathUtils";
 import { colours } from "./colours";
 import { transpile } from "../node_modules/typescript/lib/typescript";
-import trail from "./Trail";
+import trail, { Trail } from "./Trail";
 
 export interface PawnProps extends EntityProps {
   load?: number;
@@ -19,25 +19,31 @@ export interface Pawn extends Entity {
 }
 
 const pawn = (props: PawnProps) => {
-  const entityType = EntityType.Pawn;
+  let ret: Partial<Pawn> = {
+    ...entity(props),
+  };
+  ret.entityType = EntityType.Pawn;
   const { load, sight, sceneObjects } = props;
-  const { pos, move, tick, ctx, Kill, Create } = entity(props);
+  const { pos, move, ctx, Kill, Create } = ret;
   const maxSpeed = 2;
   const minSpeed = 0.5;
   const dim = 5;
-  let trailCD = 0;
-  const trailCDMax = 10;
-  let eating = false;
 
-  const pawnDraw = () => {
+  const trailDistMax = 5;
+  let distToTrail = trailDistMax;
+  let trailObj: Trail = null;
+
+  ret.eating = false;
+
+  ret.draw = () => {
     ctx.fillStyle = `rgba(${colours.turqois}, 1)`;
     ctx.fillRect(pos.x - dim / 2, pos.y - dim / 2, dim, dim);
   };
 
-  const pawnTick = () => {
+  ret.tick = () => {
     let x = 0;
     let y = 0;
-    eating = false;
+    ret.eating = false;
     forEach(sceneObjects, (obj: Entity) => {
       const influencers = [EntityType.Source];
       if (influencers.includes(obj.entityType)) {
@@ -52,7 +58,7 @@ const pawn = (props: PawnProps) => {
           if (distToSource < source.strength + dim / 2) {
             // source.changeStrength(-1);
             source.strength -= 0.1;
-            eating = true;
+            ret.eating = true;
             if (source.strength <= 0) {
               Kill(source);
             }
@@ -93,23 +99,17 @@ const pawn = (props: PawnProps) => {
         Math.max(Math.min(magnitude(dir), maxSpeed), minSpeed),
     };
 
-    trailCD += 1;
-    if (trailCD >= trailCDMax) {
-      Create(trail({ ...props, pos: { x: pos.x, y: pos.y } }));
-      trailCD = 0;
+    if (trailObj) {
+      distToTrail = magnitude(ret.pos, trailObj.pos);
     }
-    if (!eating) move(dir);
-    tick();
+    if (distToTrail >= trailDistMax) {
+      trailObj = trail({ ...props, pos: { x: pos.x, y: pos.y } });
+      Create(trailObj);
+    }
+    if (!ret.eating) move(dir);
   };
 
-  return {
-    ...entity({ ...props }),
-    entityType,
-    load,
-    tick: pawnTick,
-    draw: pawnDraw,
-    eating,
-  };
+  return ret;
 };
 
 export default pawn;
