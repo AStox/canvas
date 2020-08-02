@@ -66,14 +66,14 @@ const Game = () => {
   }
 
   function randomSources(props: { count: number } & OmniProps) {
-    const strengthMax = 15;
+    const juiceMax = 15;
     for (let i = 0; i < props.count; i++) {
       const sourceObj = source({
         pos: {
           x: Math.floor(Math.random() * canvas.width),
           y: Math.floor(Math.random() * canvas.height),
         },
-        strength: Math.random() * strengthMax,
+        juice: Math.random() * juiceMax,
         ...props,
       });
       sceneObjects.push(sourceObj);
@@ -81,13 +81,12 @@ const Game = () => {
   }
 
   function Run(props: OmniProps) {
-    let pawnObj = pawn({ pos: { x: 450, y: 400 }, ...props });
     let destinationObj = destination({
       pos: { x: 450, y: 400 },
-      strength: 10,
+      juice: 10,
       ...props,
     });
-    props.sceneObjects.push(pawnObj);
+    // props.sceneObjects.push(pawnObj);
     props.sceneObjects.push(destinationObj);
     randomSources({ count: 100, ...props });
     // const sourceObj = source({
@@ -95,19 +94,22 @@ const Game = () => {
     //     x: 420,
     //     y: 400,
     //   },
-    //   strength: 10,
+    //   juice: 10,
     //   ...props,
     // });
     // sceneObjects.push(sourceObj);
 
     setInterval(() => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      frame += 1;
+      if (play) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        frame += 1;
 
-      Tick(props.sceneObjects);
-      Draw(props.sceneObjects);
+        Tick(props.sceneObjects);
+        Draw(props.sceneObjects);
+      }
     }, TICKSPEED);
   }
+  let play = true;
 
   useEffect(() => {
     canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -116,6 +118,7 @@ const Game = () => {
       const omniProps = { ctx, canvas, frame, sceneObjects, Kill, Create };
       Run(omniProps);
     }
+    canvas.addEventListener("space", () => (play = !play));
   }, []);
 
   return (

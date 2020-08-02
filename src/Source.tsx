@@ -1,17 +1,15 @@
 import { EntityProps, Entity } from "./Entity";
 import { EntityType } from "./EntityType";
 import entity from "./Entity";
-import { clamp } from "./MathUtils";
-import { deflateRaw } from "zlib";
-import { createTextChangeRange } from "../node_modules/typescript/lib/typescript";
 import { colours } from "./colours";
+import { max, min } from "lodash";
 
 export interface SourceProps extends EntityProps {
-  strength: number;
+  juice: number;
 }
 
 export interface Source extends Entity {
-  strength: number;
+  juice: number;
   range: number;
   falloff(dist: number): number;
 }
@@ -20,17 +18,17 @@ const source = (props: SourceProps) => {
   let ret: Partial<Source> = {
     ...entity(props),
   };
-  let { strength, ctx, pos } = props;
+  let { juice, ctx, pos } = props;
   let { draw } = ret;
-  const minStrength = 2;
-  ret.strength = Math.max(strength, minStrength);
+  const minJuice = 2;
+  ret.juice = Math.max(juice, minJuice);
   // range = range || 10;
-  ret.range = strength * 1.8;
+  ret.range = juice * 1.8;
 
   ret.entityType = EntityType.Source;
 
   ret.falloff = (dist: number) => {
-    const boost = strength * 30;
+    const boost = juice * 30;
     const val = boost / (1 * dist);
     return val;
   };
@@ -56,7 +54,7 @@ const source = (props: SourceProps) => {
 
     ctx.fillStyle = `rgba(${colours.yellow}, 1)`;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, ret.strength, 0, Math.PI * 2, true);
+    ctx.arc(pos.x, pos.y, ret.juice, 0, Math.PI * 2, true);
     ctx.fill();
   };
 

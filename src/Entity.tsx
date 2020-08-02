@@ -7,6 +7,7 @@ export interface EntityProps extends OmniProps {
 
 export interface Entity extends EntityProps {
   entityType: EntityType;
+  dim: number;
   move(newPos: Pos2D): void;
   tick(): void;
   draw(): void;
@@ -39,6 +40,7 @@ let entity = function (props: EntityProps) {
   return {
     ...props,
     entityType,
+    dim,
     pos,
     tick,
     draw,

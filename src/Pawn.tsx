@@ -4,18 +4,65 @@ import { Source } from "./Source";
 import { EntityType } from "./EntityType";
 import { magnitude, normalize } from "./MathUtils";
 import { colours } from "./colours";
-import { transpile } from "../node_modules/typescript/lib/typescript";
 import trail, { Trail } from "./Trail";
+import { Destination } from "./Destination";
 
 export interface PawnProps extends EntityProps {
-  load?: number;
   sight?: number;
+  destination: Destination;
 }
 
 export interface Pawn extends Entity {
   load: number;
   tick(): void;
   eating: boolean;
+  destination: Destination;
+  returning: boolean;
+}
+
+const influencersTypes = [EntityType.Source];
+const destinationTypes = [EntityType.Destination];
+
+function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
+  let dir = { x: 0, y: 0 };
+  forEach(
+    ret.sceneObjects.filter((obj: Entity) => filter.includes(obj.entityType)),
+    (obj: Entity) => {
+      let source = obj as Source;
+
+      let dirToSource = normalize({
+        x: source.pos.x - ret.pos.x,
+        y: source.pos.y - ret.pos.y,
+      });
+
+      let distToSource = magnitude(ret.pos, source.pos);
+
+      if (source.entityType === EntityType.Source) {
+        if (distToSource < source.juice + ret.dim / 2) {
+          source.juice -= 0.1;
+          ret.load += 0.1;
+          ret.eating = true;
+          if (source.juice <= 0) {
+            ret.Kill(source);
+          }
+        }
+
+        dirToSource.x *=
+          source.juice * loadFactor * source.falloff(distToSource);
+        dirToSource.y *=
+          source.juice * loadFactor * source.falloff(distToSource);
+        dir.x += dirToSource.x;
+        dir.y += dirToSource.y;
+      }
+      // SOURCE DEBUG LINES
+      // ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
+      // ctx.beginPath();
+      // ctx.moveTo(pos.x, pos.y);
+      // ctx.lineTo(pos.x + dirToSource.x * 100, pos.y + dirToSource.y * 100);
+      // ctx.stroke();
+    }
+  );
+  return dir;
 }
 
 const pawn = (props: PawnProps) => {
@@ -23,11 +70,25 @@ const pawn = (props: PawnProps) => {
     ...entity(props),
   };
   ret.entityType = EntityType.Pawn;
-  const { load, sight, sceneObjects } = props;
-  const { pos, move, ctx, Kill, Create } = ret;
+  ret.load = 0;
+  ret.dim = 5;
+  ret.destination = props.destination;
+  ret.returning = false;
+  const { sight } = props;
+  const {
+    pos,
+    move,
+    ctx,
+    Kill,
+    Create,
+    sceneObjects,
+    load,
+    dim,
+    destination,
+  } = ret;
   const maxSpeed = 2;
   const minSpeed = 0.5;
-  const dim = 5;
+  const maxLoad = 5;
 
   const trailDistMax = 5;
   let distToTrail = trailDistMax;
@@ -41,42 +102,19 @@ const pawn = (props: PawnProps) => {
   };
 
   ret.tick = () => {
+    ret.eating = false;
     let x = 0;
     let y = 0;
-    ret.eating = false;
-    forEach(sceneObjects, (obj: Entity) => {
-      const influencers = [EntityType.Source];
-      if (influencers.includes(obj.entityType)) {
-        let source = obj as Source;
-        let dirToSource = normalize({
-          x: source.pos.x - pos.x,
-          y: source.pos.y - pos.y,
-        });
 
-        let distToSource = magnitude(pos, source.pos);
-        if (source.entityType === EntityType.Source) {
-          if (distToSource < source.strength + dim / 2) {
-            // source.changeStrength(-1);
-            source.strength -= 0.1;
-            ret.eating = true;
-            if (source.strength <= 0) {
-              Kill(source);
-            }
-          }
+    //todo: Make a pawns desire to returning a scaling factor that changes the strength of
+    // influencers as load reaches its max.
 
-          dirToSource.x *= source.strength * source.falloff(distToSource);
-          dirToSource.y *= source.strength * source.falloff(distToSource);
-          x += dirToSource.x;
-          y += dirToSource.y;
-        }
-        // SOURCE DEBUG LINES
-        // ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
-        // ctx.beginPath();
-        // ctx.moveTo(pos.x, pos.y);
-        // ctx.lineTo(pos.x + dirToSource.x * 100, pos.y + dirToSource.y * 100);
-        // ctx.stroke();
-      }
-    });
+    const loadFactor = ret.load / maxLoad;
+    const sources = SumInfluences(ret, influencersTypes, 1 - loadFactor);
+    const base = SumInfluences(ret, destinationTypes, loadFactor);
+    x += sources.x;
+    y += sources.y;
+
     let dir = { x, y };
 
     // DIR DEBUG LINE

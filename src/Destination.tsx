@@ -2,33 +2,40 @@ import { EntityProps, Entity } from "./Entity";
 import { EntityType } from "./EntityType";
 import entity from "./Entity";
 import { colours } from "./colours";
+import pawn from "./Pawn";
 
 export interface DestinationProps extends EntityProps {
-  strength: number;
+  juice: number;
 }
 
 export interface Destination extends Entity {
-  strength: number;
+  juice: number;
 }
 
 const destination = (props: DestinationProps) => {
-  let ret: partial<Source> = {
+  let ret: Partial<Destination> = {
     ...entity(props),
   };
-  let { strength, ctx, pos } = props;
-  let { draw } = entity(props);
-  const minStrength = 2;
-  ret.strength = Math.max(strength, minStrength);
-  // range = range || 10;
+  let { ctx, pos, Create, juice } = ret;
 
   ret.entityType = EntityType.Destination;
 
-  ret.tick = () => {};
+  ret.tick = () => {
+    if (juice >= 10) {
+      let pawnObj = pawn({
+        ...props,
+        pos: { x: pos.x, y: pos.y },
+        destination: ret,
+      });
+      Create(pawnObj);
+      juice -= 10;
+    }
+  };
 
   ret.draw = () => {
     ctx.fillStyle = `rgba(${colours.green}, 1)`;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, ret.strength, 0, Math.PI * 2, true);
+    ctx.arc(pos.x, pos.y, juice + 10, 0, Math.PI * 2, true);
     ctx.fill();
   };
 
