@@ -5,6 +5,7 @@ import source from "./Source";
 import { Entity } from "./Entity";
 import { colours } from "./colours";
 import destination from "./Destination";
+import { EntityType } from "./EntityType";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
@@ -26,18 +27,18 @@ const Game = () => {
   let killList: Entity[] = [];
   let createList: Entity[] = [];
 
-  function afterTick(sceneObjects: Entity[]) {
-    forEach(killList, (killObj) => {
-      sceneObjects.splice(sceneObjects.indexOf(killObj), 1);
-      killList.splice(killList.indexOf(killObj), 1);
-    });
-  }
-
   function beforeTick(sceneObjects: Entity[]) {
     forEach(createList, (createObj) => {
       sceneObjects.push(createObj);
-      createList.splice(createList.indexOf(createObj), 1);
     });
+    createList = [];
+  }
+
+  function afterTick(sceneObjects: Entity[]) {
+    forEach(killList, (killObj) => {
+      sceneObjects.splice(sceneObjects.indexOf(killObj), 1);
+    });
+    killList = [];
   }
 
   function Tick(sceneObjects: Entity[]) {
@@ -52,7 +53,6 @@ const Game = () => {
     ctx.fillStyle = `rgba(${colours.background},1)`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     forEach(sceneObjects, (obj: Entity) => {
-      // console.log(obj.pos);
       obj.draw();
     });
   }
@@ -83,10 +83,21 @@ const Game = () => {
   function Run(props: OmniProps) {
     let destinationObj = destination({
       pos: { x: 450, y: 400 },
-      juice: 10,
+      juice: 30,
       ...props,
     });
-    // props.sceneObjects.push(pawnObj);
+    let pawnObj1 = pawn({
+      pos: { x: 200, y: 200 },
+      destination: destinationObj,
+      ...props,
+    });
+    let pawnObj2 = pawn({
+      pos: { x: 400, y: 200 },
+      destination: destinationObj,
+      ...props,
+    });
+    // props.sceneObjects.push(pawnObj1);
+    // props.sceneObjects.push(pawnObj2);
     props.sceneObjects.push(destinationObj);
     randomSources({ count: 100, ...props });
     // const sourceObj = source({

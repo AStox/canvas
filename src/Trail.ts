@@ -2,26 +2,26 @@ import { colours } from "./colours";
 import { EntityType } from "./EntityType";
 import source, { Source, SourceProps } from "./Source";
 
-export interface TrailProps extends SourceProps {
-  juice?: number;
-}
+export interface TrailProps extends SourceProps {}
 
 export interface Trail extends Source {}
 
 const trail = (props: TrailProps) => {
-  const dim = 3;
-  const juice = 0.1;
+  const { ctx, pos } = props;
 
-  const sourceProps = source({ ...props, juice: juice });
-  sourceProps.entityType = EntityType.Trail;
-  const { ctx, pos } = sourceProps;
-
-  const trailDraw = () => {
-    // console.log(pos);
+  const draw = () => {
     ctx.fillStyle = `rgba(${colours.blue}, 1)`;
-    ctx.fillRect(pos.x - dim / 2, pos.y - dim / 2, dim, dim);
+    ctx.fillRect(pos.x - ret.dim / 2, pos.y - ret.dim / 2, ret.dim, ret.dim);
   };
-  return { ...sourceProps, draw: trailDraw, juice };
+
+  let ret: Trail = {
+    ...source(props),
+    entityType: EntityType.Trail,
+    draw,
+    dim: 3,
+  };
+
+  return ret;
 };
 
 export default trail;

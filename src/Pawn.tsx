@@ -2,7 +2,7 @@ import { forEach, includes } from "lodash";
 import entity, { EntityProps, Entity } from "./Entity";
 import { Source } from "./Source";
 import { EntityType } from "./EntityType";
-import { magnitude, normalize } from "./MathUtils";
+import { clamp, magnitude, normalize } from "./MathUtils";
 import { colours } from "./colours";
 import trail, { Trail } from "./Trail";
 import { Destination } from "./Destination";
@@ -26,7 +26,9 @@ const destinationTypes = [EntityType.Destination];
 function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
   let dir = { x: 0, y: 0 };
   forEach(
-    ret.sceneObjects.filter((obj: Entity) => filter.includes(obj.entityType)),
+    ret.sceneObjects.filter(
+      (obj: Entity) => obj && filter.includes(obj.entityType)
+    ),
     (obj: Entity) => {
       let source = obj as Source;
 
@@ -37,43 +39,44 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
 
       let distToSource = magnitude(ret.pos, source.pos);
 
-      if (source.entityType === EntityType.Source) {
-        if (distToSource < source.juice + ret.dim / 2) {
+      if (distToSource < source.juice + ret.dim / 2) {
+        if (source.entityType === EntityType.Source) {
           source.juice -= 0.1;
           ret.load += 0.1;
           ret.eating = true;
           if (source.juice <= 0) {
             ret.Kill(source);
           }
+        } else if (source.entityType === EntityType.Destination) {
+          if (ret.load > 0) {
+            ret.eating = true;
+            ret.load -= 0.1;
+            source.juice += 0.1;
+          }
         }
-
-        dirToSource.x *=
-          source.juice * loadFactor * source.falloff(distToSource);
-        dirToSource.y *=
-          source.juice * loadFactor * source.falloff(distToSource);
-        dir.x += dirToSource.x;
-        dir.y += dirToSource.y;
       }
-      // SOURCE DEBUG LINES
-      // ctx.strokeStyle = `rgba(256, 0, 0, 1)`;
-      // ctx.beginPath();
-      // ctx.moveTo(pos.x, pos.y);
-      // ctx.lineTo(pos.x + dirToSource.x * 100, pos.y + dirToSource.y * 100);
-      // ctx.stroke();
+
+      dirToSource.x *= source.juice * loadFactor * source.falloff(distToSource);
+      dirToSource.y *= source.juice * loadFactor * source.falloff(distToSource);
+      dir.x += dirToSource.x;
+      dir.y += dirToSource.y;
     }
   );
+  if (isNaN(dir.x)) dir.x = 0;
+  if (isNaN(dir.y)) dir.y = 0;
   return dir;
 }
 
 const pawn = (props: PawnProps) => {
-  let ret: Partial<Pawn> = {
+  let ret: Pawn = {
     ...entity(props),
+    entityType: EntityType.Pawn,
+    load: 0,
+    dim: 5,
+    eating: false,
+    destination: props.destination,
+    returning: false,
   };
-  ret.entityType = EntityType.Pawn;
-  ret.load = 0;
-  ret.dim = 5;
-  ret.destination = props.destination;
-  ret.returning = false;
   const { sight } = props;
   const {
     pos,
@@ -90,9 +93,9 @@ const pawn = (props: PawnProps) => {
   const minSpeed = 0.5;
   const maxLoad = 5;
 
-  const trailDistMax = 5;
+  const trailDistMax = 25;
   let distToTrail = trailDistMax;
-  let trailObj: Trail = null;
+  let trailObj: Trail = undefined;
 
   ret.eating = false;
 
@@ -109,11 +112,11 @@ const pawn = (props: PawnProps) => {
     //todo: Make a pawns desire to returning a scaling factor that changes the strength of
     // influencers as load reaches its max.
 
-    const loadFactor = ret.load / maxLoad;
+    const loadFactor = clamp(ret.load / maxLoad, 0, 1);
     const sources = SumInfluences(ret, influencersTypes, 1 - loadFactor);
     const base = SumInfluences(ret, destinationTypes, loadFactor);
-    x += sources.x;
-    y += sources.y;
+    x += sources.x + base.x;
+    y += sources.y + base.y;
 
     let dir = { x, y };
 
@@ -141,7 +144,7 @@ const pawn = (props: PawnProps) => {
       distToTrail = magnitude(ret.pos, trailObj.pos);
     }
     if (distToTrail >= trailDistMax) {
-      trailObj = trail({ ...props, pos: { x: pos.x, y: pos.y } });
+      trailObj = trail({ ...props, juice: 0, pos: { x: pos.x, y: pos.y } });
       Create(trailObj);
     }
     if (!ret.eating) move(dir);

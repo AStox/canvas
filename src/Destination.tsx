@@ -1,42 +1,46 @@
-import { EntityProps, Entity } from "./Entity";
 import { EntityType } from "./EntityType";
-import entity from "./Entity";
 import { colours } from "./colours";
 import pawn from "./Pawn";
+import source, { Source, SourceProps } from "./Source";
+import { max } from "lodash";
 
-export interface DestinationProps extends EntityProps {
+export interface DestinationProps extends SourceProps {
   juice: number;
 }
 
-export interface Destination extends Entity {
+export interface Destination extends Source {
   juice: number;
 }
 
 const destination = (props: DestinationProps) => {
-  let ret: Partial<Destination> = {
-    ...entity(props),
-  };
-  let { ctx, pos, Create, juice } = ret;
-
-  ret.entityType = EntityType.Destination;
-
-  ret.tick = () => {
-    if (juice >= 10) {
+  let { ctx, pos } = props;
+  const juiceMin = 5;
+  const pawnCost = 30;
+  const tick = () => {
+    ret.juice = max([ret.juice, juiceMin]);
+    if (ret.juice >= pawnCost) {
+      ret.juice -= pawnCost;
       let pawnObj = pawn({
         ...props,
         pos: { x: pos.x, y: pos.y },
         destination: ret,
       });
-      Create(pawnObj);
-      juice -= 10;
+      ret.Create(pawnObj);
     }
   };
 
-  ret.draw = () => {
+  const draw = () => {
     ctx.fillStyle = `rgba(${colours.green}, 1)`;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, juice + 10, 0, Math.PI * 2, true);
+    ctx.arc(pos.x, pos.y, ret.juice, 0, Math.PI * 2, true);
     ctx.fill();
+  };
+
+  let ret: Destination = {
+    ...source(props),
+    entityType: EntityType.Destination,
+    draw,
+    tick,
   };
 
   return ret;

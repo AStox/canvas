@@ -11,7 +11,7 @@ export interface Entity extends EntityProps {
   move(newPos: Pos2D): void;
   tick(): void;
   draw(): void;
-  kill(): void;
+  killed: boolean;
 }
 
 // export interface EntityFunc {
@@ -19,11 +19,7 @@ export interface Entity extends EntityProps {
 // }
 
 let entity = function (props: EntityProps) {
-  // entity = entity.bind(entity);
-  const entityType = EntityType.Entity;
-  let { pos, ctx, killList } = props;
-  pos = pos || { x: 1, y: 1 };
-  const dim = { height: 5, width: 5 };
+  let { pos, ctx } = props;
 
   const move = (newPos: Pos2D) => {
     pos.x += newPos.x;
@@ -32,20 +28,24 @@ let entity = function (props: EntityProps) {
 
   const draw = () => {
     ctx.fillStyle = `rgba(256, 256, 256, 1)`;
-    ctx.fillRect(pos.x, pos.y, dim.height, dim.width);
+    ctx.fillRect(pos.x, pos.y, dim, dim);
   };
 
   const tick = () => {};
 
-  return {
+  let ret: Entity = {
     ...props,
-    entityType,
-    dim,
-    pos,
-    tick,
-    draw,
+    entityType: EntityType.Entity,
+    dim: 5,
     move,
+    draw,
+    tick,
+    killed: false,
   };
+
+  let { dim } = ret;
+
+  return ret;
 };
 
 export default entity;
