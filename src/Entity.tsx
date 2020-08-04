@@ -12,14 +12,11 @@ export interface Entity extends EntityProps {
   tick(): void;
   draw(): void;
   killed: boolean;
+  layer: number;
 }
 
-// export interface EntityFunc {
-//   (props: EntityProps): EntityReturn;
-// }
-
-let entity = function (props: EntityProps) {
-  let { pos, ctx } = props;
+const entity = (props: EntityProps) => {
+  const { pos, ctx } = props;
 
   const move = (newPos: Pos2D) => {
     pos.x += newPos.x;
@@ -28,12 +25,12 @@ let entity = function (props: EntityProps) {
 
   const draw = () => {
     ctx.fillStyle = `rgba(256, 256, 256, 1)`;
-    ctx.fillRect(pos.x, pos.y, dim, dim);
+    ctx.fillRect(pos.x, pos.y, ret.dim, ret.dim);
   };
 
   const tick = () => {};
 
-  let ret: Entity = {
+  const ret: Entity = {
     ...props,
     entityType: EntityType.Entity,
     dim: 5,
@@ -41,9 +38,8 @@ let entity = function (props: EntityProps) {
     draw,
     tick,
     killed: false,
+    layer: 1,
   };
-
-  let { dim } = ret;
 
   return ret;
 };

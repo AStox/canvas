@@ -1,9 +1,9 @@
-import { forEach, includes } from "lodash";
+import { forEach } from "lodash";
+import { clamp, magnitude, normalize } from "./MathUtils";
+import { colours } from "./colours";
 import entity, { EntityProps, Entity } from "./Entity";
 import { Source } from "./Source";
 import { EntityType } from "./EntityType";
-import { clamp, magnitude, normalize } from "./MathUtils";
-import { colours } from "./colours";
 import trail, { Trail } from "./Trail";
 import { Destination } from "./Destination";
 
@@ -22,22 +22,23 @@ export interface Pawn extends Entity {
 
 const influencersTypes = [EntityType.Source];
 const destinationTypes = [EntityType.Destination];
+const trailTypes = [EntityType.Trail];
 
 function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
-  let dir = { x: 0, y: 0 };
+  const dir = { x: 0, y: 0 };
   forEach(
     ret.sceneObjects.filter(
       (obj: Entity) => obj && filter.includes(obj.entityType)
     ),
     (obj: Entity) => {
-      let source = obj as Source;
+      const source = obj as Source;
 
-      let dirToSource = normalize({
+      const dirToSource = normalize({
         x: source.pos.x - ret.pos.x,
         y: source.pos.y - ret.pos.y,
       });
 
-      let distToSource = magnitude(ret.pos, source.pos);
+      const distToSource = magnitude(ret.pos, source.pos);
 
       if (distToSource < source.juice + ret.dim / 2) {
         if (source.entityType === EntityType.Source) {
@@ -62,13 +63,13 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
       dir.y += dirToSource.y;
     }
   );
-  if (isNaN(dir.x)) dir.x = 0;
-  if (isNaN(dir.y)) dir.y = 0;
+  if (Number.isNaN(dir.x)) dir.x = 0;
+  if (Number.isNaN(dir.y)) dir.y = 0;
   return dir;
 }
 
 const pawn = (props: PawnProps) => {
-  let ret: Pawn = {
+  const ret: Pawn = {
     ...entity(props),
     entityType: EntityType.Pawn,
     load: 0,
@@ -76,26 +77,16 @@ const pawn = (props: PawnProps) => {
     eating: false,
     destination: props.destination,
     returning: false,
+    layer: 3,
   };
-  const { sight } = props;
-  const {
-    pos,
-    move,
-    ctx,
-    Kill,
-    Create,
-    sceneObjects,
-    load,
-    dim,
-    destination,
-  } = ret;
+  const { pos, move, ctx, Create, dim } = ret;
   const maxSpeed = 2;
   const minSpeed = 0.5;
   const maxLoad = 5;
 
   const trailDistMax = 25;
   let distToTrail = trailDistMax;
-  let trailObj: Trail = undefined;
+  let trailObj: Trail;
 
   ret.eating = false;
 
@@ -109,14 +100,15 @@ const pawn = (props: PawnProps) => {
     let x = 0;
     let y = 0;
 
-    //todo: Make a pawns desire to returning a scaling factor that changes the strength of
+    // todo: Make a pawns desire to returning a scaling factor that changes the strength of
     // influencers as load reaches its max.
 
     const loadFactor = clamp(ret.load / maxLoad, 0, 1);
     const sources = SumInfluences(ret, influencersTypes, 1 - loadFactor);
     const base = SumInfluences(ret, destinationTypes, loadFactor);
-    x += sources.x + base.x;
-    y += sources.y + base.y;
+    const trails = SumInfluences(ret, trailTypes, 1);
+    x += sources.x + base.x + trails.x;
+    y += sources.y + base.y + trails.y;
 
     let dir = { x, y };
 

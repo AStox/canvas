@@ -7,7 +7,7 @@
     "build": "webpack",
     "start": "webpack-dev-server --hot --inline",
     "test": "jest",
-    "lint": "eslint src/**/*.js src/**/*.tsx & sass-lint src/**/*.scss src/**/*.sass"
+    "lint": "eslint src/**/*.js src/**/*.tsx"
   },
   "author": "",
   "license": "ISC",

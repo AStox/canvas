@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
-import forEach from "lodash/forEach";
-import pawn from "./Pawn";
+import { sortBy, forEach } from "lodash";
 import source from "./Source";
 import { Entity } from "./Entity";
 import { colours } from "./colours";
 import destination from "./Destination";
-import { EntityType } from "./EntityType";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
@@ -23,36 +21,36 @@ const Game = () => {
   const TICKSPEED = 16.6;
   // const TICKSPEED = 500;
 
-  let sceneObjects: Entity[] = [];
-  let killList: Entity[] = [];
-  let createList: Entity[] = [];
+  const sceneObjects: Entity[] = [];
+  const killList: Entity[] = [];
+  const createList: Entity[] = [];
 
-  function beforeTick(sceneObjects: Entity[]) {
+  function beforeTick() {
     forEach(createList, (createObj) => {
       sceneObjects.push(createObj);
     });
-    createList = [];
+    createList.splice(0, createList.length);
   }
 
-  function afterTick(sceneObjects: Entity[]) {
+  function afterTick() {
     forEach(killList, (killObj) => {
       sceneObjects.splice(sceneObjects.indexOf(killObj), 1);
     });
-    killList = [];
+    killList.splice(0, killList.length);
   }
 
-  function Tick(sceneObjects: Entity[]) {
-    beforeTick(sceneObjects);
+  function Tick() {
+    beforeTick();
     forEach(sceneObjects, (obj: Entity) => {
       obj.tick();
     });
-    afterTick(sceneObjects);
+    afterTick();
   }
 
-  function Draw(sceneObjects: Entity[]) {
+  function Draw() {
     ctx.fillStyle = `rgba(${colours.background},1)`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    forEach(sceneObjects, (obj: Entity) => {
+    forEach(sortBy(sceneObjects, "layer"), (obj: Entity) => {
       obj.draw();
     });
   }
@@ -80,22 +78,24 @@ const Game = () => {
     }
   }
 
+  let play = true;
+
   function Run(props: OmniProps) {
-    let destinationObj = destination({
+    const destinationObj = destination({
       pos: { x: 450, y: 400 },
       juice: 30,
       ...props,
     });
-    let pawnObj1 = pawn({
-      pos: { x: 200, y: 200 },
-      destination: destinationObj,
-      ...props,
-    });
-    let pawnObj2 = pawn({
-      pos: { x: 400, y: 200 },
-      destination: destinationObj,
-      ...props,
-    });
+    // const pawnObj1 = pawn({
+    //   pos: { x: 200, y: 200 },
+    //   destination: destinationObj,
+    //   ...props,
+    // });
+    // const pawnObj2 = pawn({
+    //   pos: { x: 400, y: 200 },
+    //   destination: destinationObj,
+    //   ...props,
+    // });
     // props.sceneObjects.push(pawnObj1);
     // props.sceneObjects.push(pawnObj2);
     props.sceneObjects.push(destinationObj);
@@ -120,7 +120,11 @@ const Game = () => {
       }
     }, TICKSPEED);
   }
-  let play = true;
+
+  function togglePlay(e: KeyboardEvent) {
+    console.log("toggled");
+    if (e.key === "space") play = !play;
+  }
 
   useEffect(() => {
     canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -129,11 +133,17 @@ const Game = () => {
       const omniProps = { ctx, canvas, frame, sceneObjects, Kill, Create };
       Run(omniProps);
     }
-    canvas.addEventListener("space", () => (play = !play));
+    document.addEventListener("keydown", togglePlay);
+    return document.removeEventListener("keydown", togglePlay);
   }, []);
 
   return (
-    <canvas id="canvas" height={window.innerHeight} width={window.innerWidth} />
+    <canvas
+      id="canvas"
+      tabIndex={0}
+      height={window.innerHeight}
+      width={window.innerWidth}
+    />
   );
 };
 
