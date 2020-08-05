@@ -4,4 +4,5 @@ export enum EntityType {
   Source = "SOURCE",
   Trail = "TRAIL",
   Destination = "DESTINATION",
+  Swamp = "SWAMP",
 }

@@ -4,6 +4,7 @@ import source from "./Source";
 import { Entity } from "./Entity";
 import { colours } from "./colours";
 import destination from "./Destination";
+import swamp, { SwampProps } from "./Swamp";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
@@ -78,6 +79,11 @@ const Game = () => {
     }
   }
 
+  function RandomSwamps(props: SwampProps) {
+    const swampObj = swamp({ ...props });
+    sceneObjects.push(swampObj);
+  }
+
   let play = true;
 
   function Run(props: OmniProps) {
@@ -100,6 +106,7 @@ const Game = () => {
     // props.sceneObjects.push(pawnObj2);
     props.sceneObjects.push(destinationObj);
     randomSources({ count: 100, ...props });
+    RandomSwamps({ radius: 50, pos: { x: 250, y: 250 }, ...props });
     // const sourceObj = source({
     //   pos: {
     //     x: 420,
