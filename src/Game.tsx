@@ -129,19 +129,24 @@ const Game = () => {
   }
 
   function togglePlay(e: KeyboardEvent) {
-    console.log("toggled");
-    if (e.key === "space") play = !play;
+    if (e.key === " ") {
+      play = !play;
+      e.preventDefault();
+    }
   }
 
   useEffect(() => {
     canvas = document.getElementById("canvas") as HTMLCanvasElement;
     if (canvas && canvas.getContext) {
+      canvas.focus();
       ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
       const omniProps = { ctx, canvas, frame, sceneObjects, Kill, Create };
       Run(omniProps);
     }
     document.addEventListener("keydown", togglePlay);
-    return document.removeEventListener("keydown", togglePlay);
+    return () => {
+      document.removeEventListener("keydown", togglePlay);
+    };
   }, []);
 
   return (
