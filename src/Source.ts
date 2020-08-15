@@ -4,18 +4,20 @@ import { colours } from "./colours";
 
 export interface SourceProps extends EntityProps {
   juice: number;
+  strength: number;
 }
 
 export interface Source extends Entity {
   juice: number;
+  strength: number;
   falloff(dist: number): number;
 }
 
 const source = (props: SourceProps) => {
-  const { juice, ctx, pos } = props;
+  const { juice, ctx, pos, strength } = props;
 
   const falloff = (dist: number) => {
-    const boost = juice * 30;
+    const boost = ret.strength * 30;
     const val = boost / (1 * dist);
     return val;
   };
@@ -33,6 +35,7 @@ const source = (props: SourceProps) => {
     juice,
     falloff,
     draw,
+    strength,
   };
 
   return ret;
