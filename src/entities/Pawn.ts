@@ -1,11 +1,12 @@
-import { forEach } from "lodash";
-import { clamp, magnitude, normalize } from "./MathUtils";
-import { colours } from "./colours";
+import { forEach, includes, intersection } from "lodash";
+import { clamp, magnitude, normalize } from "../MathUtils";
+import { colours } from "../colours";
 import entity, { EntityProps, Entity } from "./Entity";
 import { Source } from "./Source";
-import { EntityType } from "./EntityType";
+import { EntityType } from "../EntityType";
 import trail, { Trail } from "./Trail";
 import { Destination } from "./Destination";
+import { Sugar } from "./Sugar";
 
 export interface PawnProps extends EntityProps {
   sight?: number;
@@ -28,7 +29,7 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
   const dir = { x: 0, y: 0 };
   forEach(
     ret.sceneObjects.filter(
-      (obj: Entity) => obj && filter.includes(obj.entityType)
+      (obj: Entity) => obj && intersection(filter, obj.entityType).length > 0
     ),
     (obj: Entity) => {
       const source = obj as Source;
@@ -39,26 +40,29 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
       });
 
       const distToSource = magnitude(ret.pos, source.pos);
-
-      if (distToSource < source.juice + ret.dim / 2) {
-        if (source.entityType === EntityType.Source) {
-          source.juice -= 0.1;
+      if (distToSource < source.radius) {
+        if (includes(source.entityType, EntityType.Sugar)) {
+          const sugar = source as Sugar;
+          sugar.juice -= 0.1;
           ret.load += 0.1;
           ret.eating = true;
-          if (source.juice <= 0) {
-            ret.Kill(source);
+          if (sugar.juice <= 0) {
+            ret.Kill(sugar);
           }
-        } else if (source.entityType === EntityType.Destination) {
+        } else if (includes(source.entityType, EntityType.Destination)) {
           if (ret.load > 0) {
+            const dest = source as Destination;
             ret.eating = true;
             ret.load -= 0.1;
-            source.juice += 0.1;
+            dest.juice += 0.1;
           }
         }
       }
-
-      dirToSource.x *= source.juice * loadFactor * source.falloff(distToSource);
-      dirToSource.y *= source.juice * loadFactor * source.falloff(distToSource);
+      console.log(source);
+      dirToSource.x *=
+        source.strength * loadFactor * source.falloff(distToSource);
+      dirToSource.y *=
+        source.strength * loadFactor * source.falloff(distToSource);
       dir.x += dirToSource.x;
       dir.y += dirToSource.y;
     }
@@ -71,15 +75,15 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
 const pawn = (props: PawnProps) => {
   const ret: Pawn = {
     ...entity(props),
-    entityType: EntityType.Pawn,
     load: 0,
-    dim: 5,
+    radius: 5,
     eating: false,
     destination: props.destination,
     returning: false,
     layer: 3,
   };
-  const { pos, move, ctx, Create, dim } = ret;
+  ret.entityType = [...ret.entityType, EntityType.Pawn];
+  const { pos, move, ctx, Create, radius } = ret;
   const maxSpeed = 2;
   const minSpeed = 0.5;
   const maxLoad = 5;
@@ -92,7 +96,7 @@ const pawn = (props: PawnProps) => {
 
   ret.draw = () => {
     ctx.fillStyle = `rgba(${colours.turqois}, 1)`;
-    ctx.fillRect(pos.x - dim / 2, pos.y - dim / 2, dim, dim);
+    ctx.fillRect(pos.x - radius / 2, pos.y - radius / 2, radius, radius);
   };
 
   ret.tick = () => {
@@ -136,8 +140,8 @@ const pawn = (props: PawnProps) => {
       distToTrail = magnitude(ret.pos, trailObj.pos);
     }
     if (distToTrail >= trailDistMax) {
-      trailObj = trail({ ...props, juice: 0, pos: { x: pos.x, y: pos.y } });
-      Create(trailObj);
+      trailObj = trail({ ...props, strength: 0, pos: { x: pos.x, y: pos.y } });
+      // Create(trailObj);
     }
     if (!ret.eating) move(dir);
   };

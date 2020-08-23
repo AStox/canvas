@@ -1,5 +1,5 @@
-import { colours } from "./colours";
-import { EntityType } from "./EntityType";
+import { colours } from "../colours";
+import { EntityType } from "../EntityType";
 import source, { Source, SourceProps } from "./Source";
 
 export interface TrailProps extends SourceProps {}
@@ -11,15 +11,21 @@ const trail = (props: TrailProps) => {
 
   const draw = () => {
     ctx.fillStyle = `rgba(${colours.blue}, 1)`;
-    ctx.fillRect(pos.x - ret.dim / 2, pos.y - ret.dim / 2, ret.dim, ret.dim);
+    ctx.fillRect(
+      pos.x - ret.radius / 2,
+      pos.y - ret.radius / 2,
+      ret.radius,
+      ret.radius
+    );
   };
 
   let ret: Trail = {
     ...source(props),
-    entityType: EntityType.Trail,
     draw,
-    dim: 3,
+    radius: 3,
   };
+
+  ret.entityType = [...ret.entityType, EntityType.Trail];
 
   return ret;
 };

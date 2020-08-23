@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { sortBy, forEach } from "lodash";
-import source from "./Source";
-import { Entity } from "./Entity";
+import { Entity } from "./entities/Entity";
 import { colours } from "./colours";
-import destination from "./Destination";
-import swamp, { SwampProps } from "./Swamp";
+import destination from "./entities/Destination";
+import swamp, { SwampProps } from "./entities/Swamp";
+import sugar from "./entities/Sugar";
 
 export interface OmniProps {
   canvas: HTMLCanvasElement;
@@ -19,8 +19,8 @@ const Game = () => {
   let canvas: HTMLCanvasElement = document.getElementById("canvas");
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
-  const TICKSPEED = 16.6;
-  // const TICKSPEED = 500;
+  // const TICKSPEED = 16.6;
+  const TICKSPEED = 500;
 
   const sceneObjects: Entity[] = [];
   const killList: Entity[] = [];
@@ -67,7 +67,7 @@ const Game = () => {
   function randomSources(props: { count: number } & OmniProps) {
     const juiceMax = 15;
     for (let i = 0; i < props.count; i++) {
-      const sourceObj = source({
+      const sourceObj = sugar({
         pos: {
           x: Math.floor(Math.random() * canvas.width),
           y: Math.floor(Math.random() * canvas.height),
@@ -105,8 +105,8 @@ const Game = () => {
     // props.sceneObjects.push(pawnObj1);
     // props.sceneObjects.push(pawnObj2);
     props.sceneObjects.push(destinationObj);
-    randomSources({ count: 100, ...props });
-    RandomSwamps({ radius: 50, pos: { x: 250, y: 250 }, ...props });
+    randomSources({ count: 1, ...props });
+    // RandomSwamps({ radius: 50, pos: { x: 250, y: 250 }, ...props });
     // const sourceObj = source({
     //   pos: {
     //     x: 420,

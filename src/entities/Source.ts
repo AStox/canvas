@@ -1,20 +1,17 @@
 import entity, { EntityProps, Entity } from "./Entity";
-import { EntityType } from "./EntityType";
-import { colours } from "./colours";
+import { EntityType } from "../EntityType";
 
 export interface SourceProps extends EntityProps {
-  juice: number;
   strength: number;
 }
 
 export interface Source extends Entity {
-  juice: number;
   strength: number;
   falloff(dist: number): number;
 }
 
 const source = (props: SourceProps) => {
-  const { juice, ctx, pos, strength } = props;
+  const { strength } = props;
 
   const falloff = (dist: number) => {
     const boost = ret.strength * 30;
@@ -22,21 +19,13 @@ const source = (props: SourceProps) => {
     return val;
   };
 
-  const draw = () => {
-    ctx.fillStyle = `rgba(${colours.yellow}, 1)`;
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, Math.max(ret.juice, 0), 0, Math.PI * 2, true);
-    ctx.fill();
-  };
-
   let ret: Source = {
     ...entity(props),
-    entityType: EntityType.Source,
-    juice,
     falloff,
-    draw,
     strength,
   };
+
+  ret.entityType = [...ret.entityType, EntityType.Source];
 
   return ret;
 };

@@ -1,18 +1,18 @@
-import { EntityType } from "./EntityType";
-import { colours } from "./colours";
+import { EntityType } from "../EntityType";
+import { colours } from "../colours";
 import pawn from "./Pawn";
 import source, { Source, SourceProps } from "./Source";
 
-export interface DestinationProps extends SourceProps {
+export type DestinationProps = Omit<SourceProps, "strength"> & {
   juice: number;
-}
+};
 
 export interface Destination extends Source {
   juice: number;
 }
 
 const destination = (props: DestinationProps) => {
-  const { ctx, pos } = props;
+  const { ctx, pos, juice } = props;
   const juiceMin = 5;
   const pawnCost = 30;
   const tick = () => {
@@ -39,12 +39,14 @@ const destination = (props: DestinationProps) => {
   };
 
   const ret: Destination = {
-    ...source(props),
-    entityType: EntityType.Destination,
+    ...source({ ...props, strength: juice }),
     draw,
+    juice,
     tick,
     layer: 2,
   };
+
+  ret.entityType = [...ret.entityType, EntityType.Destination];
 
   return ret;
 };

@@ -5,4 +5,5 @@ export enum EntityType {
   Trail = "TRAIL",
   Destination = "DESTINATION",
   Swamp = "SWAMP",
+  Sugar = "SUGAR",
 }

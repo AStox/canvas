@@ -1,4 +1,5 @@
 import { random } from "lodash";
+import { EntityType } from "../EntityType";
 import entity, { Entity, EntityProps } from "./Entity";
 
 export interface SwampProps extends EntityProps {
@@ -92,6 +93,9 @@ const swamp = (props: SwampProps) => {
     ...entity(props),
     draw,
   };
+
+  ret.entityType = [...ret.entityType, EntityType.Swamp];
+
   return ret;
 };
 
