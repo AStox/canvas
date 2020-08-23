@@ -19,8 +19,8 @@ const Game = () => {
   let canvas: HTMLCanvasElement = document.getElementById("canvas");
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
-  // const TICKSPEED = 16.6;
-  const TICKSPEED = 500;
+  const TICKSPEED = 16.6;
+  // const TICKSPEED = 500;
 
   const sceneObjects: Entity[] = [];
   const killList: Entity[] = [];

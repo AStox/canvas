@@ -1,4 +1,4 @@
-import { forEach, includes, intersection } from "lodash";
+import { difference, forEach, includes, intersection } from "lodash";
 import { clamp, magnitude, normalize } from "../MathUtils";
 import { colours } from "../colours";
 import entity, { EntityProps, Entity } from "./Entity";
@@ -21,15 +21,19 @@ export interface Pawn extends Entity {
   returning: boolean;
 }
 
-const influencersTypes = [EntityType.Source];
-const destinationTypes = [EntityType.Destination];
-const trailTypes = [EntityType.Trail];
+// Filters are in the format [[Types to include],[Types to exclude]]
+const influencersTypes = [[EntityType.Source], [EntityType.Destination]];
+const destinationTypes = [[EntityType.Destination], []];
+const trailTypes = [[EntityType.Trail], []];
 
 function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
   const dir = { x: 0, y: 0 };
   forEach(
     ret.sceneObjects.filter(
-      (obj: Entity) => obj && intersection(filter, obj.entityType).length > 0
+      (obj: Entity) =>
+        obj &&
+        intersection(filter[0], obj.entityType).length > 0 &&
+        intersection(filter[1], obj.entityType).length === 0
     ),
     (obj: Entity) => {
       const source = obj as Source;
@@ -58,7 +62,10 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
           }
         }
       }
-      console.log(source);
+      // console.log(filter[0][0] + " strength:", source.strength);
+      // console.log(filter[0][0] + " loadFact:", loadFactor);
+      // console.log(filter[0][0] + " falloff :", source.falloff(distToSource));
+      // console.log(filter[0][0] + " entityTypes :", source.entityType);
       dirToSource.x *=
         source.strength * loadFactor * source.falloff(distToSource);
       dirToSource.y *=
