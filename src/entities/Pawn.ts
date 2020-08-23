@@ -1,19 +1,19 @@
-import { difference, forEach, includes, intersection } from "lodash";
+import { forEach, includes, intersection } from "lodash";
 import { clamp, magnitude, normalize } from "../MathUtils";
 import { colours } from "../colours";
-import entity, { EntityProps, Entity } from "./Entity";
-import { Source } from "./Source";
+import { Entity } from "./Entity";
+import source, { Source, SourceProps } from "./Source";
 import { EntityType } from "../EntityType";
 import trail, { Trail } from "./Trail";
 import { Destination } from "./Destination";
 import { Sugar } from "./Sugar";
 
-export interface PawnProps extends EntityProps {
+export interface PawnProps extends SourceProps {
   sight?: number;
   destination: Destination;
 }
 
-export interface Pawn extends Entity {
+export interface Pawn extends Source {
   load: number;
   tick(): void;
   eating: boolean;
@@ -22,29 +22,33 @@ export interface Pawn extends Entity {
 }
 
 // Filters are in the format [[Types to include],[Types to exclude]]
-const influencersTypes = [[EntityType.Source], [EntityType.Destination]];
+const influencersTypes = [
+  [EntityType.Source],
+  [EntityType.Destination, EntityType.Pawn],
+];
 const destinationTypes = [[EntityType.Destination], []];
+const pawnTypes = [[EntityType.Pawn], []];
 const trailTypes = [[EntityType.Trail], []];
 
-function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
+function SumInfluences(ret: Pawn, filter: EntityType[][], loadFactor: number) {
   const dir = { x: 0, y: 0 };
   forEach(
     ret.sceneObjects.filter(
       (obj: Entity) =>
         obj &&
+        obj !== ret &&
         intersection(filter[0], obj.entityType).length > 0 &&
         intersection(filter[1], obj.entityType).length === 0
     ),
     (obj: Entity) => {
       const source = obj as Source;
-
       const dirToSource = normalize({
         x: source.pos.x - ret.pos.x,
         y: source.pos.y - ret.pos.y,
       });
 
       const distToSource = magnitude(ret.pos, source.pos);
-      if (distToSource < source.radius) {
+      if (distToSource < source.radius + ret.radius) {
         if (includes(source.entityType, EntityType.Sugar)) {
           const sugar = source as Sugar;
           sugar.juice -= 0.1;
@@ -62,10 +66,6 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
           }
         }
       }
-      // console.log(filter[0][0] + " strength:", source.strength);
-      // console.log(filter[0][0] + " loadFact:", loadFactor);
-      // console.log(filter[0][0] + " falloff :", source.falloff(distToSource));
-      // console.log(filter[0][0] + " entityTypes :", source.entityType);
       dirToSource.x *=
         source.strength * loadFactor * source.falloff(distToSource);
       dirToSource.y *=
@@ -81,16 +81,17 @@ function SumInfluences(ret: Pawn, filter: EntityType[], loadFactor: number) {
 
 const pawn = (props: PawnProps) => {
   const ret: Pawn = {
-    ...entity(props),
+    ...source(props),
     load: 0,
     radius: 5,
     eating: false,
     destination: props.destination,
     returning: false,
     layer: 3,
+    strength: -10,
   };
   ret.entityType = [...ret.entityType, EntityType.Pawn];
-  const { pos, move, ctx, Create, radius } = ret;
+  const { pos, move, ctx, CreateStatic, radius } = ret;
   const maxSpeed = 2;
   const minSpeed = 0.5;
   const maxLoad = 5;
@@ -117,9 +118,10 @@ const pawn = (props: PawnProps) => {
     const loadFactor = clamp(ret.load / maxLoad, 0, 1);
     const sources = SumInfluences(ret, influencersTypes, 1 - loadFactor);
     const base = SumInfluences(ret, destinationTypes, loadFactor);
-    const trails = SumInfluences(ret, trailTypes, 1);
-    x += sources.x + base.x + trails.x;
-    y += sources.y + base.y + trails.y;
+    // const trails = SumInfluences(ret, trailTypes, 1);
+    const pawns = SumInfluences(ret, pawnTypes, 1);
+    x += sources.x + base.x + pawns.x;
+    y += sources.y + base.y + pawns.y;
 
     let dir = { x, y };
 
@@ -148,7 +150,7 @@ const pawn = (props: PawnProps) => {
     }
     if (distToTrail >= trailDistMax) {
       trailObj = trail({ ...props, strength: 0, pos: { x: pos.x, y: pos.y } });
-      // Create(trailObj);
+      CreateStatic(trailObj);
     }
     if (!ret.eating) move(dir);
   };

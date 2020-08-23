@@ -13,18 +13,25 @@ export interface Sugar extends Source {
 const sugar = (props: SugarProps) => {
   const { juice, ctx, pos } = props;
 
-  const ret: Sugar = {
-    ...source({ ...props, strength: juice }),
-    juice,
+  const tick = () => {
+    ret.strength = ret.juice;
   };
-  ret.entityType = [...ret.entityType, EntityType.Sugar];
-  ret.draw = () => {
-    ret.radius = juice;
+
+  const draw = () => {
+    ret.radius = ret.juice;
     ctx.fillStyle = `rgba(${colours.yellow}, 1)`;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, Math.max(ret.radius, 0), 0, Math.PI * 2, true);
     ctx.fill();
   };
+
+  const ret: Sugar = {
+    ...source({ ...props, strength: juice }),
+    draw,
+    juice,
+    tick,
+  };
+  ret.entityType = [...ret.entityType, EntityType.Sugar];
 
   return ret;
 };

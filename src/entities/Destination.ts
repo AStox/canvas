@@ -14,13 +14,15 @@ export interface Destination extends Source {
 const destination = (props: DestinationProps) => {
   const { ctx, pos, juice } = props;
   const juiceMin = 5;
-  const pawnCost = 30;
+  const pawnCost = 15;
+
   const tick = () => {
     ret.juice = Math.max(ret.juice, juiceMin);
     if (ret.juice >= pawnCost) {
       ret.juice -= pawnCost;
       const pawnObj = pawn({
         ...props,
+        strength: 10,
         pos: { x: pos.x, y: pos.y },
         destination: ret,
       });

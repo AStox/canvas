@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { sortBy, forEach } from "lodash";
+import { sortBy, forEach, concat } from "lodash";
 import { Entity } from "./entities/Entity";
 import { colours } from "./colours";
 import destination from "./entities/Destination";
@@ -13,24 +13,31 @@ export interface OmniProps {
   sceneObjects: Entity[];
   Kill(obj: Entity): void;
   Create(obj: Entity): void;
+  CreateStatic(obj: Entity): void;
 }
 
 const Game = () => {
   let canvas: HTMLCanvasElement = document.getElementById("canvas");
   let ctx: CanvasRenderingContext2D;
   let frame = 0;
-  const TICKSPEED = 16.6;
+  const TICKSPEED = 33.2;
   // const TICKSPEED = 500;
 
   const sceneObjects: Entity[] = [];
+  const staticObjects: Entity[] = [];
   const killList: Entity[] = [];
   const createList: Entity[] = [];
+  const staticCreateList: Entity[] = [];
 
   function beforeTick() {
     forEach(createList, (createObj) => {
       sceneObjects.push(createObj);
     });
     createList.splice(0, createList.length);
+    forEach(staticCreateList, (createObj) => {
+      staticObjects.push(createObj);
+    });
+    staticCreateList.splice(0, staticCreateList.length);
   }
 
   function afterTick() {
@@ -51,9 +58,12 @@ const Game = () => {
   function Draw() {
     ctx.fillStyle = `rgba(${colours.background},1)`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    forEach(sortBy(sceneObjects, "layer"), (obj: Entity) => {
-      obj.draw();
-    });
+    forEach(
+      sortBy(concat(sceneObjects, staticObjects), "layer"),
+      (obj: Entity) => {
+        obj.draw();
+      }
+    );
   }
 
   function Kill(obj: Entity) {
@@ -62,6 +72,10 @@ const Game = () => {
 
   function Create(obj: Entity) {
     createList.push(obj);
+  }
+
+  function CreateStatic(obj: Entity) {
+    staticCreateList.push(obj);
   }
 
   function randomSources(props: { count: number } & OmniProps) {
@@ -105,7 +119,7 @@ const Game = () => {
     // props.sceneObjects.push(pawnObj1);
     // props.sceneObjects.push(pawnObj2);
     props.sceneObjects.push(destinationObj);
-    randomSources({ count: 1, ...props });
+    randomSources({ count: 100, ...props });
     // RandomSwamps({ radius: 50, pos: { x: 250, y: 250 }, ...props });
     // const sourceObj = source({
     //   pos: {
@@ -140,7 +154,15 @@ const Game = () => {
     if (canvas && canvas.getContext) {
       canvas.focus();
       ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-      const omniProps = { ctx, canvas, frame, sceneObjects, Kill, Create };
+      const omniProps = {
+        ctx,
+        canvas,
+        frame,
+        sceneObjects,
+        Kill,
+        Create,
+        CreateStatic,
+      };
       Run(omniProps);
     }
     document.addEventListener("keydown", togglePlay);
