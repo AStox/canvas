@@ -119,7 +119,7 @@ const pawn = (props: PawnProps) => {
     const sources = SumInfluences(ret, influencersTypes, 1 - loadFactor);
     const base = SumInfluences(ret, destinationTypes, loadFactor);
     // const trails = SumInfluences(ret, trailTypes, 1);
-    const pawns = SumInfluences(ret, pawnTypes, 1);
+    const pawns = SumInfluences(ret, pawnTypes, 1 - loadFactor);
     x += sources.x + base.x + pawns.x;
     y += sources.y + base.y + pawns.y;
 
